@@ -48,5 +48,8 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 
+# Ignore specific file types
+
 *.zip
 *.dta
+*.tab
