@@ -9,12 +9,23 @@ usethis::edit_r_environ()
 
 #install.packages("dataverse")
 
-filename <- "brazil-RD-analysis.R"
+files <- dataverse::dataset_files(
+              dataset = "doi:10.7910/DVN/AWSQTW&version=1.1",
+              server = "dataverse.harvard.edu"
+)
 
-dataverse::get_file_by_name(
-              filename = filename,
+
+filenames <- c()
+
+for(file in files){
+  filenames <- c(filenames, file$label)
+}
+
+for (i in 1:length(filenames)){
+  dataverse::get_file_by_name(
+              filename = filenames[i],
               dataset = "doi:10.7910/DVN/AWSQTW&version=1.1",
               server = "dataverse.harvard.edu" 
               ) |>
-           writeBin(con = here::here("original_materials", paste0(filename)))
-  
+           writeBin(con = here::here("original_materials", paste0(filenames[i])))
+}
