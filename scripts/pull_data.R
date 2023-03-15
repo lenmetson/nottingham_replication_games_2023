@@ -9,11 +9,10 @@ usethis::edit_r_environ()
 
 #install.packages("dataverse")
 
-files <- dataverse::dataset_files(
-              dataset = "doi:10.7910/DVN/AWSQTW&version=1.1",
-              server = "dataverse.harvard.edu"
-)
-
+get_full_rep_files <- function(data_doi,server_link){
+  files <- dataverse::dataset_files(
+              dataset = data_doi,
+              server =  server_link)
 
 filenames <- c()
 
@@ -24,8 +23,13 @@ for(file in files){
 for (i in 1:length(filenames)){
   dataverse::get_file_by_name(
               filename = filenames[i],
-              dataset = "doi:10.7910/DVN/AWSQTW&version=1.1",
-              server = "dataverse.harvard.edu" 
+              dataset = data_doi,
+              server = "server_link" 
               ) |>
            writeBin(con = here::here("original_materials", paste0(filenames[i])))
 }
+
+}
+
+get_full_rep_files(data_doi = "doi:10.7910/DVN/AWSQTW&version=1.1",
+                   server_link = "dataverse.harvard.edu")
