@@ -26,7 +26,7 @@ for (i in 1:length(filenames)){
               dataset = "doi:10.7910/DVN/AWSQTW&version=1.1",
               server = "dataverse.harvard.edu"
               ) |>
-           writeBin(con = 
+           writeBin(con =
             here::here("original_materials",
                        paste0(filenames[i])))
 }
