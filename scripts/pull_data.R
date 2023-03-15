@@ -7,36 +7,14 @@ usethis::edit_r_environ()
 # Type DATAVERSE_KEY="your-key-goes-here"
 # Paste DATAVERSE_SERVER = "dataverse.harvard.edu" below
 
-url <- "https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/AWSQTW&version=1.1"
-id <- "doi:10.7910/DVN/AWSQTW&version=1.1"
-install.packages("dataverse")
+#install.packages("dataverse")
 
-dataverse::dataverse_fetch(id, 
-                           path = 
-                                here::here(
-                                    "original_materials"))
+filename <- "brazil-RD-analysis.R"
 
-
-?dataverse::get_dataverse()
-
-
-
-# Replace with the persistent identifier of the Dataverse folder
-persistent_id <- "doi:10.7910/DVN/AWSQTW&version=1.1"
-
-# Construct the URL of the Dataverse API endpoint
-url <- "https://en.wikipedia.org/wiki/Silicon_Valley_Bank"
-
-# Send a GET request to the API endpoint to obtain the download URL
-response <- httr::GET(url)
-download_url <- httr::content(response)$data$downloadUrl
-
-# Download the file using the download URL
-download_file <- httr::GET(download_url)
-
-httr::content(download_file, type = "application/zip", as = "raw") |>
-  writeBin(here::here("original_materials", "orginal_meterial.zip"))
-
-Sys.getenv()
-
-
+dataverse::get_file_by_name(
+              filename = filename,
+              dataset = "doi:10.7910/DVN/AWSQTW&version=1.1",
+              server = "dataverse.harvard.edu" 
+              ) |>
+           writeBin(con = here::here("original_materials", paste0(filename)))
+  
