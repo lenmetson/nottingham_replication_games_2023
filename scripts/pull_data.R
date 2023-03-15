@@ -20,7 +20,7 @@ for(file in files){
   filenames <- c(filenames, file$label)
 }
 
-for (i in 1:length(filenames)){
+for (i in seq_along(filenames)){
   dataverse::get_file_by_name(
               filename = filenames[i],
               dataset = "doi:10.7910/DVN/AWSQTW&version=1.1",
