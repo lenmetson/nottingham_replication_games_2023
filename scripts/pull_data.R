@@ -32,6 +32,3 @@ for (i in seq_along(filenames)){
             here::here("original_materials",
                        paste0(filenames[i])))
 }
-
-
-len = c(1,2,3)
