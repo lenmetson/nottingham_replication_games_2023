@@ -1,3 +1,6 @@
+
+
+```{r}
 # Read in data 
 
 ## The file we downloaded is a stata file, 
@@ -16,3 +19,5 @@ names(df)
 # Table 2 
 
 df$dlameduck_runs==0
+
+```
