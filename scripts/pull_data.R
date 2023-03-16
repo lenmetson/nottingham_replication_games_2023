@@ -29,6 +29,6 @@ for (i in seq_along(filenames)){
               server = "dataverse.harvard.edu"
               ) |>
            writeBin(con =
-            here::here("original_materials",
+            here::here("original_materials", "main_paper",
                        paste0(filenames[i])))
 }
