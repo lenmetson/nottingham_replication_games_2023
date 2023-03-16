@@ -1,0 +1,131 @@
+------------------------------------------------------------------------------
+
+May 18, 2016
+
+
+This is the codebook for the main replication file, "KlasnjaTitiunik-Brazil-data", for the paper "The Incumbency Curse: Weak Parties, Term Limits, and Unfulfilled Accountability", by Marko Klasnja and Rocio Titiunik, to appear in the American Political Science Review
+.
+-------------------------------------------------------------------------------
+
+
+Authors' contact information			
+Marko Klasnja 					
+School of Foreign Service and Department of Government
+Georgetown University						
+marko.klasnja@georgetown.edu
+
+					
+Rocio Titiunik
+Assistant Professor of Political Science
+University of Michigan
+titiunik@umich.edu
+
+
+--------------------------------------------------------------------------------
+
+
+
+variable name			Description
+--------------------------------------------------------------------------------
+
+
+
+year            		Year
+numpar_candidates_eff		Effective number of parties
+votesh_n1       		Vote share, 1st-placed party
+votesh_n2       		Vote share, 2nd-placed party
+votesh_party_PP 		PP vote share
+votesh_party_PT 		PT vote share
+votesh_party_PMDB		PMDB vote share
+votesh_party_DEM		DEM vote share
+votesh_party_PSDB		PSDB vote share
+winner_educ     		Winner's education
+winner_male     		Winner's gender (male = 1)
+winner_age      		Winner's age
+ver_votesh_party_PP		PP vote share (local council)
+ver_votesh_party_PT		PT vote share (local council)
+ver_votesh_party_PMDB		PMDB vote share (local council)
+ver_votesh_party_DEM		DEM vote share (local council)
+ver_votesh_party_PSDB		PSDB vote share (local council)
+party_PP_runs   		PP runs
+party_PT_runs   		PT runs
+party_PMDB_runs 		PMDB runs
+party_DEM_runs  		DEM runs
+party_PSDB_runs 		PSDB runs
+mv_party_PP     		PP margin of victory
+mv_party_PT     		PT margin of victory
+mv_party_PMDB   		PMDB margin of victory
+mv_party_DEM    		DEM margin of victory
+mv_party_PSDB   		PSDB margin of victory
+votesh_party_PPfor1		PP vote share at t+1
+votesh_party_PTfor1		PT vote share at t+1
+votesh_party_PMDBfor1		PMDB vote share at t+1
+votesh_party_DEMfor1		DEM vote share at t+1
+votesh_party_PSDBfor1		PSDB vote share at t+1
+mv_party_PPfor1 		PP margin of victory at t+1
+mv_party_PTfor1 		PT margin of victory at t+1
+mv_party_PMDBfor1		PMDB margin of victory at t+1
+mv_party_DEMfor1		DEM margin of victory at t+1
+mv_party_PSDBfor1		PSDB margin of victory at t+1
+party_PP_runslag1		PP runs at t-1
+party_PP_runsfor1		PP runs at t+1
+party_PT_runslag1		PT runs at t-1
+party_PT_runsfor1		PT runs at t+1
+party_PMDB_runslag1		PMDB runs at t-1
+party_PMDB_runsfor1		PMDB runs at t+1
+party_DEM_runslag1		DEM runs at t-1
+party_DEM_runsfor1		DEM runs at t+1
+party_PSDB_runslag1		PSDB runs at t-1
+party_PSDB_runsfor1		PSDB runs at t+1
+party_PP_wonfor1		PP won at t+1, conditional on running
+party_PT_wonfor1		PT won at t+1, conditional on running
+party_PMDB_wonfor1		PMDB won at t+1, conditional on running
+party_DEM_wonfor1		DEM won at t+1, conditional on running
+party_PSDB_wonfor1		PSDB won at t+1, conditional on running
+inc_party_won   		Incumbent party (from t-1) won at t
+mv_incparty     		Incumbent party's margin of victory at t
+mv_incpartyfor1 		Incumbent party's margin of victory at t+1
+inc_party_runsfor1		Incumbent party runs at t+1
+inc_party_wonfor1		Incumbent party won at t+1, conditional on running
+coal_size_party_PP		PP coalition size
+coal_size_party_PT		PT coalition size
+coal_size_party_PMDB		PMDB coalition size
+coal_size_party_DEM		DEM coalition size
+coal_size_party_PSDB		PSDB coalition size
+coal_size_party_PPfor1		PP coalition size at t+1
+coal_size_party_PTfor1		PT coalition size at t+1
+coal_size_party_PMDBfor1	PMDB coalition size at t+1
+coal_size_party_DEMfor1		DEM coalition size at t+1
+coal_size_party_PSDBfor1	PSDB coalition size at t+1
+dlameduck_runs  		Lame duck incumbent runs
+dlameduck_party_PP_runs		PP lame duck incumbent runs
+dlameduck_party_PT_runs		PT lame duck incumbent runs
+dlameduck_party_PMDB_run	PMDB lame duck incumbent runs
+dlameduck_party_DEM_runs	DEM lame duck incumbent runs
+dlameduck_party_PSDB_run	PSDB lame duck incumbent runs
+inc_party_wonfor1_b1		Incumbent party won at t+1, unconditional on running
+party_PP_wonfor1_b1		PP won at t+1, unconditional on running
+party_PP_wonlag1_b1		PP won at t-1, unconditional on running
+party_PT_wonfor1_b1		PT won at t+1, unconditional on running
+party_PT_wonlag1_b1		PT won at t-1, unconditional on running
+party_PMDB_wonfor1_b1		PMDB won at t+1, unconditional on running
+party_PMDB_wonlag1_b1		PMDB won at t-1, unconditional on running
+party_DEM_wonfor1_b1		DEM won at t+1, unconditional on running
+party_DEM_wonlag1_b1		DEM won at t-1, unconditional on running
+party_PSDB_wonfor1_b1		PSDB won at t+1, unconditional on running
+party_PSDB_wonlag1_b1		PSDB won at t-1, unconditional on running
+population      double		Population
+growth_func_admdir_total	Adm. employment growth at t+1
+housing_programfor1		Housing program at t+1
+housing_program_matfor1		Housing materials program at t+1
+expmun_asoc_totfor1		Social assistance expenditures at t+1
+nxt4yr_mn_des_sum2_shdestot	Share HESA expenditures at t+1
+pib             		Municipal GDP
+pibpc           		Municipal GDP per capita
+revenue_total   		Total revenue
+expend_total    		Total expenditure
+dnorte          		Located in the north
+dnordeste       		Located in the north-east
+dsudeste        		Located in the south-east
+dsul            		Located in the south
+dcentrooeste    		Located in the center-east
