@@ -7,7 +7,7 @@ file.rename(here::here("original_materials", "brazil-RD-data.tab"),
 here::here("original_materials", "brazil-RD-data_renamed.dta"))
 
 df <- haven::read_dta(
-    here::here("original_materials", "brazil-RD-data_renamed.dta"))
+    here::here("original_materials", "main_paper", "brazil-RD-data_renamed.dta"))
 
 summary(df)
 
