@@ -1,0 +1,573 @@
+---
+title: "Hollyer Replication"
+output: html_document
+date: "2023-03-16"
+---
+
+
+```{r Setup}
+library(Hmisc)
+r = function(x) round(x, digits=3)
+library(rdrobust)
+library(readstata13)
+library(ggplot2)
+library(rdd)
+library(tidyverse)
+library(rddensity)
+setwd("C:/Users/edmun/Documents/2022-2023 - MSc Politics Research/97 - Replication Game/Hollyer Replication")
+data = read.dta13("./brazil-RD-data.dta")
+names(data)
+
+cross_national = read.dta13("./cross-national-data.dta")
+```
+
+```{r Table 2 Original}
+
+
+# ----------------------------- #
+# Now put results into a table to print to latex
+# ----------------------------- #
+outnm = c("Young", "Young and Outsider") 
+outvar = cbind(data$youngF_inc_for1, data$outyg1F_inc_for1)
+
+samplenm = c("Opn")
+samplevar = (data$dlameduck_runs==0)
+
+colnms = c("Outcome","Sample", "Effect", "Robust p-value",  "Robust 95 CI", "Bandwidth (h)", "Bandwidth (b)", "N right", "N left")
+res = matrix(data=NA, nrow=length(outnm), ncol=length(colnms), dimnames = list(NULL, colnms))
+
+# default rdrobust
+for(k in 1:length(outnm)) {
+    cat("Analyzing outcome ", outnm[k], " sample ", samplenm, "\n")
+    i = k
+    
+    indx = samplevar
+    y = outvar[indx,k]
+    x = data$mv_incparty[indx]
+    
+    rr = rdrobust(y=y, x=x)
+    
+    res[i,"Outcome"]        = outnm[k]
+    res[i, "Sample"]        = samplenm
+    res[i,"Effect"]         = r(rr$Estimate[1])
+    res[i,"Robust p-value"] = r(rr$pv[3])
+    res[i,"Robust 95 CI"]   = paste("[", r(rr$ci["Robust",1]), ",",  r(rr$ci["Robust",2]), "]", sep="")
+    res[i,"Bandwidth (h)"]  = r(rr$bws["h",1])
+    res[i,"Bandwidth (b)"]  = r(rr$bws["b",1])
+    res[i,"N right"]        = rr$N_h[1]
+    res[i,"N left"]         = rr$N_h[2]
+}
+
+res.hb = res
+
+# rdrobust with rho=1
+res = matrix(data=NA, nrow=length(outnm), ncol=length(colnms), dimnames = list(NULL, colnms))
+
+for(k in 1:length(outnm)) {
+    cat("Analyzing outcome ", outnm[k], " sample ", samplenm, "\n")
+    i = k
+    
+    indx = samplevar
+    y = outvar[indx,k]
+    x = data$mv_incparty[indx]
+    
+    rr = rdrobust(y=y, x=x, rho=1)
+    
+    res[i,"Outcome"]        = outnm[k]
+    res[i, "Sample"]        = samplenm
+    res[i,"Effect"]         = r(rr$Estimate[1])
+    res[i,"Robust p-value"] = r(rr$pv[3])
+    res[i,"Robust 95 CI"]   = paste("[", r(rr$ci["Robust",1]), ",",  r(rr$ci["Robust",2]), "]", sep="")
+    res[i,"Bandwidth (h)"]  = r(rr$bws["h",1])
+    res[i,"Bandwidth (b)"]  = r(rr$bws["b",1])
+    res[i,"N right"]        = rr$N_h[1]
+    res[i,"N left"]         = rr$N_h[2]
+    
+}
+
+res.rho1 = res
+
+# Default rdrobust specs
+print(res.hb)
+# Using h=b (rho=1)
+print(res.rho1)
+
+
+# Make table pretty and print
+# Young and Young outsider for Open seat sample only
+tab = rbind(res.hb[,c(-2)])
+colnames(tab)[2] = "$\\tau^\\mathtt{RD}$"
+colnames(tab)[3] = "$\\mathtt{p}$-$\\mathtt{value}$"
+colnames(tab)[4] = "$\\mathtt{95\\%\\;CI}$"
+colnames(tab)[5] = "$\\mathtt{h}$"
+colnames(tab)[6] = "$\\mathtt{b}$"
+colnames(tab)[7] = "$\\mathtt{N}_{+}$"
+colnames(tab)[8] = "$\\mathtt{N}_{-}$"
+# Add confidence interval for rho=1
+tab = cbind(tab,res.rho1[,"Robust 95 CI"])
+colnames(tab)[9] = "$\\mathtt{95\\%\\;CI\\; (h=b)}$"
+print(tab)
+
+h.y  = res.hb[1,6]
+b.y  = res.hb[1,7]
+t.y  = res.hb[1,3]
+ci.y=  res.hb[1,5]
+
+
+h.yo  = res.hb[2,6]
+b.yo  = res.hb[2,7]
+t.yo  = res.hb[2,3]
+ci.yo=  res.hb[2,5]
+
+```
+
+```{r Figure 6 Original}
+
+##----------------------------#
+# youngF_inc_for1: Young indicator (35 or less)
+##----------------------------#
+outnm = "young"
+y = data$youngF_inc_for1
+x = data$mv_incparty
+indx = (data$dlameduck_runs==0)
+
+xpos = -25
+ypos = 0.5
+# only munis where lame-duck does *not* run 
+g = rdplot(y[indx], x[indx], subset = (abs(x[indx]) <= 50), p=2,
+       x.label="Incumbent party's margin of victory at t", y.label = "Incumbent party's candidate at t+1 young indicator (original report)", title="")
+annotation = data.frame( 
+  x = c(xpos, xpos, xpos, xpos),
+  y = c(ypos, ypos-0.03, ypos-0.06, ypos-0.09),
+  label = c(paste("Local linear RD effect = ",t.y,sep=""), paste("Robust 95% CI = ",ci.y,sep=""), paste("Main bandwidth = ", h.y, sep=""),
+            paste("Bias bandwidth = ", b.y, sep=""))
+)
+g$rdplot +  theme(axis.text=element_text(size=10),axis.title = element_text(size=15))
+
+##----------------------------#
+# outyg1F_inc_for1: Young outsider indicator (==0 is reserved for age>=35 and elected officials and government employees excluding military and police)
+##----------------------------#
+
+outnm = "out1young"
+y=data$outyg1F_inc_for1
+x = data$mv_incparty
+indx = (data$dlameduck_runs==0)
+
+# only munis where lame-duck does *not* run 
+g = rdplot(y[indx], x[indx], subset = (abs(x[indx]) <= 50), p=2,
+           x.label="Incumbent party's margin of victory at t", y.label = "Incumbent party's candidate at t+1 young and outsider", title="")
+annotation = data.frame( 
+  x = c(xpos, xpos, xpos, xpos),
+  y = c(ypos, ypos-0.03, ypos-0.06, ypos-0.09),
+  label = c(paste("Local linear RD effect = ",t.yo,sep=""), paste("Robust 95% CI = ",ci.yo,sep=""), paste("Main bandwidth = ", h.yo, sep=""),
+            paste("Bias bandwidth = ", b.yo, sep=""))
+)
+g$rdplot + theme(axis.text=element_text(size=10), axis.title = element_text(size=15))
+
+```
+
+```{r Table E3 Original}
+
+validation = read.dta13("./brazil-validation-data.dta")
+dim(data)
+
+outnm = c("Young Indicator", "Young and Outsider Indicator")
+outvar = cbind(data$cand_youngF, data$cand_outyg1F)
+
+colnms = c("Outcome", "Mean (I==1)", "Mean (I==0)",  "p-value", "N (I==1)", "N (I==0)")
+res = matrix(data=NA, nrow=length(outnm), ncol=length(colnms), dimnames = list(NULL, colnms))
+
+for(i in 1:length(outnm)) {
+  cat("Analyzing outcome ", outnm[i], "\n")
+  y = outvar[,i]
+  x = data$err_mvparty
+  
+  rr = t.test(x[y==1],  x[y==0])
+  
+  res[i,"Outcome"]        = outnm[i]
+  res[i,"Mean (I==1)"]    = r(mean(x[y==1], na.rm=T))
+  res[i,"Mean (I==0)"]    = r(mean(x[y==0], na.rm=T))
+  res[i,"p-value"]        = r(rr$p.value)
+  res[i,"N (I==1)"]       = sum(!is.na(x[y==1]))
+  res[i,"N (I==0)"]       = sum(!is.na(x[y==0]))
+}
+print(res)
+
+# Make table pretty and print
+# Young and Young outsider for Open seat sample only
+tab = res[1:2,]
+colnames(tab)[2] = "$\\mathtt{Mean}_1$"
+colnames(tab)[3] = "$\\mathtt{Mean}_0$"
+colnames(tab)[4] = "$\\mathtt{p}$-$\\mathtt{value}$"
+colnames(tab)[5] = "$\\mathtt{N}_1$"
+colnames(tab)[6] = "$\\mathtt{N}_0$"
+tab[1,1] = "Margin of victory: young vs. not"
+tab[2,1] = "Margin of victory: young \\& outsider vs. not"
+print(tab)
+
+```
+
+```{r Figure 6 Replication}
+
+data_noducks = data[data$dlameduck_runs == 0, ]
+
+#Replication of Figure 6
+
+rdplot(data_noducks$youngF_inc_for1, 
+       data_noducks$mv_incparty, c = 0, ci = FALSE, 
+       binselect = "esmv", 
+       subset = abs(data_noducks$mv_incparty)<50, 
+       p = 2)
+
+rdplot(data_noducks$outyg1F_inc_for1, 
+       data_noducks$mv_incparty, c = 0, ci = FALSE, 
+       binselect = "esmv", 
+       subset = abs(data_noducks$mv_incparty)<50, 
+       p = 2)
+
+#Polynomial 1
+
+rdplot(data_noducks$youngF_inc_for1, 
+       data_noducks$mv_incparty, c = 0, ci = FALSE, 
+       binselect = "esmv", 
+       subset = abs(data_noducks$mv_incparty)<50, 
+       p = 1)
+
+rdplot(data_noducks$outyg1F_inc_for1, 
+       data_noducks$mv_incparty, c = 0, ci = FALSE, 
+       binselect = "esmv", 
+       subset = abs(data_noducks$mv_incparty)<50, 
+       p = 1)
+
+#Changing no. of bins
+
+rdplot(data_noducks$youngF_inc_for1, 
+       data_noducks$mv_incparty, c = 0, ci = FALSE, 
+       binselect = "esmv", 
+       subset = abs(data_noducks$mv_incparty)<50, 
+       p = 2, nbins = nrow(data_noducks))
+
+rdplot(data_noducks$outyg1F_inc_for1, 
+       data_noducks$mv_incparty, c = 0, ci = FALSE, 
+       binselect = "esmv", 
+       subset = abs(data_noducks$mv_incparty)<50, 
+       p = 2, nbins  = nrow(data_noducks))
+
+```
+
+```{r Figure 6 Full Sample}
+
+#Replication of Figure 6
+
+rdplot(data$youngF_inc_for1, 
+       data$mv_incparty, c = 0, ci = FALSE, 
+       binselect = "esmv", 
+       subset = abs(data$mv_incparty)<50, 
+       p = 2)
+
+rdplot(data$outyg1F_inc_for1, 
+       data$mv_incparty, c = 0, ci = FALSE, 
+       binselect = "esmv", 
+       subset = abs(data$mv_incparty)<50, 
+       p = 2)
+
+```
+
+
+```{r Table 2 Replication - Young Candidate}
+
+robust_young = rdrobust(data_noducks$youngF_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd")
+summary(robust_young)
+
+robust_young_hb = rdrobust(data_noducks$youngF_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd", rho = 1)
+summary(robust_young_hb)
+
+```
+
+```{r Table 2 Replication - Outsider Candidate}
+
+robust_outsider = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd")
+summary(robust_outsider)
+
+robust_outsider_hb = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd", rho = 1)
+summary(robust_outsider)
+```
+
+```{r Table 2 Quadratic - Young Candidate}
+
+q_young = rdrobust(data_noducks$youngF_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd", p=2)
+summary(q_young)
+
+q_young_hb = rdrobust(data_noducks$youngF_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd", rho = 1, p=2)
+summary(q_young_hb)
+
+```
+
+```{r Table 2 Quadratic - Outsider Candidate}
+
+q_outsider = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd", p=2)
+summary(linear_outsider)
+
+q_outsider_hb = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd", rho = 1, p=2)
+summary(q_outsider_hb)
+```
+
+```{r Table 2 Bandwidth Selection Procedures}
+
+msetwo_young = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "msetwo")
+
+msetwo_young = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "msetwo")
+
+summary(robust_twobandwidth_outsider)
+
+summary(robust_twobandwidth_young)
+
+msesum_young = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "msesum")
+
+msesum_outsider = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "msesum")
+
+summary(msesum_young)
+
+summary(robust_twobandwidth_young)
+
+```
+
+```{r Table 2 Kernels}
+
+kernel_young = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd", 
+                                     kernel = "uniform")
+
+kernel_outsider = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd", 
+                                        kernel = "uniform")
+
+summary(kernel_young)
+
+summary(kernel_outsider)
+
+triangle_young = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd", 
+                                     kernel = "triangular")
+
+triangle_outsider = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd", 
+                                        kernel = "triangular")
+
+summary(triangle_young)
+
+summary(triangle_outsider)
+
+ep_young = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd", 
+                                     kernel = "epanechnikov")
+
+ep_outsider = rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, bwselect = "mserd", 
+                                        kernel = "epanechnikov")
+
+summary(ep_young)
+
+summary(ep_outsider)
+
+```
+
+```{r Descriptives for running variable}
+
+data_noducks %>% 
+  ggplot(aes(x = mv_incparty)) + 
+  geom_histogram(binwidth = 5) + 
+  geom_vline(xintercept = 0) +
+  geom_vline(xintercept = 20) + 
+  geom_vline(xintercept = -20)
+
+```
+
+```{r Table 2 Bandwidth Selection - Young Candidate}
+
+bandwidth <- seq(from = 5, to = 100, by = 5)  
+
+coefficient <- NA 
+se <- NA
+obs <- NA
+bw <- NA
+ci_u <- NA
+ci_l <- NA
+
+# create a data.frame with all variables you want to incldue in your dataset
+data_extract <- data.frame(bandwidth, coefficient, se, obs, bw, ci_u, ci_l)
+
+# create a loop for each bandwidth that is indicated by 'i'
+for(i in bandwidth){
+ rdbw <- rdrobust(data_noducks$youngF_inc_for1, data_noducks$mv_incparty, c = 0, h=i) # run the model
+                                      
+# extract the model output (make sure to extract *robust* statistics)
+data_extract$coefficient[data_extract$bandwidth==i]  <- rdbw$coef[3] 
+data_extract$se[data_extract$bandwidth==i]  <- rdbw$se[3]
+data_extract$obs[data_extract$bandwidth==i]  <- (rdbw$N_h[1] + rdbw$N_h[2]) 
+data_extract$bw[data_extract$bandwidth==i]  <- (rdbw$bws[1, 1]) 
+data_extract$ci_l[data_extract$bandwidth==i]  <- rdbw$ci[3,1]
+data_extract$ci_u[data_extract$bandwidth==i]  <- rdbw$ci[3,2]
+                   }
+
+# Make sure the coefficient (and all other values) are numeric
+data_extract$coefficient  <- as.numeric(data_extract$coefficient)
+
+# Plot the estimates across bandwidths
+ggplot(data = data_extract,
+       aes(x = bandwidth, y = coefficient)) +
+  geom_point(size = 0.8) +
+  geom_ribbon(aes(ymin = ci_l, ymax = ci_u), alpha = 0.2) +
+  geom_hline(aes(yintercept = 0), col = "red", linetype = 2) +
+  coord_cartesian(ylim = c(-0.25, 0)) +
+  theme_minimal() +
+  labs(y = "LATE at Discontinuity", x = "Bandwidths (Vote Margin)")
+
+```
+
+```{r Table 2 Bandwidth Selection - Outsider Candidate}
+
+bandwidth <- seq(from = 5, to = 100, by = 5)  
+
+coefficient <- NA 
+se <- NA
+obs <- NA
+bw <- NA
+ci_u <- NA
+ci_l <- NA
+
+# create a data.frame with all variables you want to incldue in your dataset
+data_extract <- data.frame(bandwidth, coefficient, se, obs, bw, ci_u, ci_l)
+
+# create a loop for each bandwidth that is indicated by 'i'
+for(i in bandwidth){
+ rdbw <- rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = 0, h=i) # run the model
+                                      
+# extract the model output (make sure to extract *robust* statistics)
+data_extract$coefficient[data_extract$bandwidth==i]  <- rdbw$coef[3] 
+data_extract$se[data_extract$bandwidth==i]  <- rdbw$se[3]
+data_extract$obs[data_extract$bandwidth==i]  <- (rdbw$N_h[1] + rdbw$N_h[2]) 
+data_extract$bw[data_extract$bandwidth==i]  <- (rdbw$bws[1, 1]) 
+data_extract$ci_l[data_extract$bandwidth==i]  <- rdbw$ci[3,1]
+data_extract$ci_u[data_extract$bandwidth==i]  <- rdbw$ci[3,2]
+                   }
+
+# Make sure the coefficient (and all other values) are numeric
+data_extract$coefficient  <- as.numeric(data_extract$coefficient)
+
+# Plot the estimates across bandwidths
+ggplot(data = data_extract,
+       aes(x = bandwidth, y = coefficient)) +
+  geom_point(size = 0.8) +
+  geom_ribbon(aes(ymin = ci_l, ymax = ci_u), alpha = 0.2) +
+  geom_hline(aes(yintercept = 0), col = "red", linetype = 2) +
+  coord_cartesian(ylim = c(-0.25, 0)) +
+  theme_minimal() +
+  labs(y = "LATE at Discontinuity", x = "Bandwidths (Vote Margin)")
+
+```
+
+```{r Density Tests}
+
+DCdensity(data_noducks$mv_incparty, cutpoint = 0, plot= TRUE, ext.out = TRUE)
+
+title(xlab = "Winning Margin", ylab = "Density") # add labels
+abline(v = 0, lty = 1) # add a vertical line at x = 0
+
+
+rdd <- rddensity(data_noducks$mv_incparty, c = 0)
+summary(rdd)
+
+plot_rdd <- rdplotdensity(rdd, data_noducks$mv_incparty, plotRange = c(-50, 50), CIuniform = TRUE)
+
+
+```
+
+```{r Table 2 Placebo Cutoffs - Young Candidate}
+
+cutoff <- seq(from = -10, to = 10, by = 1)  
+
+coefficient <- NA 
+se <- NA
+obs <- NA
+bw <- NA
+ci_u <- NA
+ci_l <- NA
+
+# create a data.frame with all variables you want to incldue in your dataset
+data_extract <- data.frame(cutoff, coefficient, se, obs, bw, ci_u, ci_l)
+
+# create a loop for each bandwidth that is indicated by 'i'
+for(i in cutoff){
+ rdbw <- rdrobust(data_noducks$youngF_inc_for1, data_noducks$mv_incparty, c = i, bwselect="mserd") # run the model
+                                      
+# extract the model output (make sure to extract *robust* statistics)
+data_extract$coefficient[data_extract$cutoff==i]  <- rdbw$coef[3] 
+data_extract$se[data_extract$cutoff==i]  <- rdbw$se[3]
+data_extract$obs[data_extract$cutoff==i]  <- (rdbw$N_h[1] + rdbw$N_h[2]) 
+data_extract$bw[data_extract$cutoff==i]  <- (rdbw$bws[1, 1]) 
+data_extract$ci_l[data_extract$cutoff==i]  <- rdbw$ci[3,1]
+data_extract$ci_u[data_extract$cutoff==i]  <- rdbw$ci[3,2]
+                   }
+
+# Make sure the coefficient (and all other values) are numeric
+data_extract$coefficient  <- as.numeric(data_extract$coefficient)
+
+# Plot the estimates across bandwidths
+ggplot(data = data_extract,
+       aes(x = cutoff, y = coefficient)) +
+  geom_point(size = 0.8) +
+  geom_ribbon(aes(ymin = ci_l, ymax = ci_u), alpha = 0.2) +
+  geom_hline(aes(yintercept = 0), col = "red", linetype = 2) +
+  coord_cartesian(ylim = c(-0.25, 0)) +
+  theme_minimal() +
+  labs(y = "LATE at Discontinuity", x = "cutoff (Vote Margin)")
+
+```
+
+```{r Table 2 Placebo Cutoffs - Young Candidate}
+
+cutoff <- seq(from = -10, to = 10, by = 1)  
+
+coefficient <- NA 
+se <- NA
+obs <- NA
+bw <- NA
+ci_u <- NA
+ci_l <- NA
+
+# create a data.frame with all variables you want to incldue in your dataset
+data_extract <- data.frame(cutoff, coefficient, se, obs, bw, ci_u, ci_l)
+
+# create a loop for each bandwidth that is indicated by 'i'
+for(i in cutoff){
+ rdbw <- rdrobust(data_noducks$outyg1F_inc_for1, data_noducks$mv_incparty, c = i, bwselect="mserd") # run the model
+                                      
+# extract the model output (make sure to extract *robust* statistics)
+data_extract$coefficient[data_extract$cutoff==i]  <- rdbw$coef[3] 
+data_extract$se[data_extract$cutoff==i]  <- rdbw$se[3]
+data_extract$obs[data_extract$cutoff==i]  <- (rdbw$N_h[1] + rdbw$N_h[2]) 
+data_extract$bw[data_extract$cutoff==i]  <- (rdbw$bws[1, 1]) 
+data_extract$ci_l[data_extract$cutoff==i]  <- rdbw$ci[3,1]
+data_extract$ci_u[data_extract$cutoff==i]  <- rdbw$ci[3,2]
+                   }
+
+# Make sure the coefficient (and all other values) are numeric
+data_extract$coefficient  <- as.numeric(data_extract$coefficient)
+
+# Plot the estimates across bandwidths
+ggplot(data = data_extract,
+       aes(x = cutoff, y = coefficient)) +
+  geom_point(size = 0.8) +
+  geom_ribbon(aes(ymin = ci_l, ymax = ci_u), alpha = 0.2) +
+  geom_hline(aes(yintercept = 0), col = "red", linetype = 2) +
+  coord_cartesian(ylim = c(-0.25, 0)) +
+  theme_minimal() +
+  labs(y = "LATE at Discontinuity", x = "cutoff (Vote Margin)")
+
+```
+
+
+#Notes:
+
+1. They don't do much/any robustness on the RD model - they refer to the previous paper (Klasnja and Tituinik 2017), but that paper used a different dependent variable.
+
+2. They validate the measures but don't provide the code - just the prediction errors. They reference machine learning but they don't provide the code. 
+
+3. The formal model seems fine. 
+
+4. Cross national and RDD - set tasks. 
