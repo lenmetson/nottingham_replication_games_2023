@@ -30,7 +30,7 @@ fig6r <- rdrobust::rdplot(data_noducks$outyg1F_inc_for1,
        subset = abs(data_noducks$mv_incparty)<50, 
        p = 2)
 
-fig6l <- fig6l$rdplot +
+fig6l <- fig6l$rdplot + ## ???? is this right?
   labs(title = "(b) Young Outsider",
        x = "Incumbent party's margin of victory at t",
        y = "Incumbent party's candidate t+1 young indicator") +
@@ -106,6 +106,7 @@ rm(fig6l.1, fig6r.1, fig6.1)
 fig6.2.1 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                  data_noducks$mv_incparty, c = 0, ci = FALSE, 
                  binselect = "esmv", 
+                 subset = abs(data_noducks$mv_incparty)<50, 
                  p = 2)
 fig6.2.1 <- fig6.2.1$rdplot + labs(title = "esmv binning", subtitle = "2nd Polynomial",
                                    x = "Incumbent party's margin of victory at t",
@@ -117,7 +118,8 @@ fig6.2.1 <- fig6.2.1$rdplot + labs(title = "esmv binning", subtitle = "2nd Polyn
 
 fig6.2.2 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                  data_noducks$mv_incparty, c = 0, ci = FALSE, 
-                 binselect = "esmv", 
+                 binselect = "esmv",
+                 subset = abs(data_noducks$mv_incparty)<50,  
                  p = 1)
 
 fig6.2.2 <- fig6.2.2$rdplot + labs(title = "esmv binning", subtitle = "1st Polynomial",
@@ -132,7 +134,8 @@ fig6.2.2 <- fig6.2.2$rdplot + labs(title = "esmv binning", subtitle = "1st Polyn
 
 fig6.2.3 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                              data_noducks$mv_incparty, c = 0, ci = FALSE, 
-                             binselect = "es", 
+                             binselect = "es",
+                             subset = abs(data_noducks$mv_incparty)<50,  
                              p = 2)
 fig6.2.3 <- fig6.2.3$rdplot + labs(title = "es binning", subtitle = "2nd Polynomial",
                                    x = "Incumbent party's margin of victory at t",
@@ -145,6 +148,7 @@ fig6.2.3 <- fig6.2.3$rdplot + labs(title = "es binning", subtitle = "2nd Polynom
 fig6.2.4 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                              data_noducks$mv_incparty, c = 0, ci = FALSE, 
                              binselect = "es", 
+                             subset = abs(data_noducks$mv_incparty)<50, 
                              p = 1)
 
 fig6.2.4 <- fig6.2.4$rdplot + labs(title = "es binning", subtitle = "1st Polynomial",
@@ -158,7 +162,8 @@ fig6.2.4 <- fig6.2.4$rdplot + labs(title = "es binning", subtitle = "1st Polynom
 
 fig6.2.5 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                              data_noducks$mv_incparty, c = 0, ci = FALSE, 
-                             binselect = "espr", 
+                             binselect = "espr",
+                             subset = abs(data_noducks$mv_incparty)<50,  
                              p = 2)
 fig6.2.5 <- fig6.2.5$rdplot + labs(title = "espr binning", subtitle = "2nd Polynomial",
                                    x = "Incumbent party's margin of victory at t",
@@ -170,7 +175,8 @@ fig6.2.5 <- fig6.2.5$rdplot + labs(title = "espr binning", subtitle = "2nd Polyn
 
 fig6.2.6 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                              data_noducks$mv_incparty, c = 0, ci = FALSE, 
-                             binselect = "espr", 
+                             binselect = "espr",
+                             subset = abs(data_noducks$mv_incparty)<50,  
                              p = 1)
 
 fig6.2.6 <- fig6.2.6$rdplot + labs(title = "espr binning", subtitle = "1st Polynomial",
@@ -186,7 +192,8 @@ fig6.2.6 <- fig6.2.6$rdplot + labs(title = "espr binning", subtitle = "1st Polyn
 
 fig6.2.7 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                              data_noducks$mv_incparty, c = 0, ci = FALSE, 
-                             binselect = "esmvpr", 
+                             binselect = "esmvpr",
+                             subset = abs(data_noducks$mv_incparty)<50,  
                              p = 2)
 fig6.2.7 <- fig6.2.7$rdplot + labs(title = "esmvpr binning", subtitle = "2nd Polynomial",
                                    x = "Incumbent party's margin of victory at t",
@@ -199,7 +206,8 @@ fig6.2.7 <- fig6.2.7$rdplot + labs(title = "esmvpr binning", subtitle = "2nd Pol
 
 fig6.2.8 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                              data_noducks$mv_incparty, c = 0, ci = FALSE, 
-                             binselect = "esmvpr", 
+                             binselect = "esmvpr",
+                             subset = abs(data_noducks$mv_incparty)<50,  
                              p = 1)
 
 fig6.2.8 <- fig6.2.8$rdplot + labs(title = "esmvpr binning", subtitle = "1st Polynomial",
@@ -213,7 +221,8 @@ fig6.2.8 <- fig6.2.8$rdplot + labs(title = "esmvpr binning", subtitle = "1st Pol
 
 fig6.2.9 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                              data_noducks$mv_incparty, c = 0, ci = FALSE, 
-                             binselect = "qs", 
+                             binselect = "qs",
+                             subset = abs(data_noducks$mv_incparty)<50,  
                              p = 2)
 fig6.2.9 <- fig6.2.9$rdplot + labs(title = "qs binning", subtitle = "2nd Polynomial",
                                    x = "Incumbent party's margin of victory at t",
@@ -225,7 +234,8 @@ fig6.2.9 <- fig6.2.9$rdplot + labs(title = "qs binning", subtitle = "2nd Polynom
 
 fig6.2.10 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                              data_noducks$mv_incparty, c = 0, ci = FALSE, 
-                             binselect = "qs", 
+                             binselect = "qs",
+                             subset = abs(data_noducks$mv_incparty)<50,  
                              p = 1)
 
 fig6.2.10 <- fig6.2.10$rdplot + labs(title = "qs binning", subtitle = "1st Polynomial",
@@ -239,7 +249,8 @@ fig6.2.10 <- fig6.2.10$rdplot + labs(title = "qs binning", subtitle = "1st Polyn
 
 fig6.2.11 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                              data_noducks$mv_incparty, c = 0, ci = FALSE, 
-                             binselect = "qspr", 
+                             binselect = "qspr",
+                             subset = abs(data_noducks$mv_incparty)<50,  
                              p = 2)
 fig6.2.11 <- fig6.2.11$rdplot + labs(title = "qspr binning", subtitle = "2nd Polynomial",
                                      x = "Incumbent party's margin of victory at t",
@@ -252,6 +263,7 @@ fig6.2.11 <- fig6.2.11$rdplot + labs(title = "qspr binning", subtitle = "2nd Pol
 fig6.2.12 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                               data_noducks$mv_incparty, c = 0, ci = FALSE, 
                               binselect = "qspr",
+                              subset = abs(data_noducks$mv_incparty)<50, 
                               p = 1)
 
 fig6.2.12 <- fig6.2.12$rdplot + labs(title = "qspr binning", subtitle = "1st Polynomial",
@@ -266,29 +278,57 @@ fig6.2.12 <- fig6.2.12$rdplot + labs(title = "qspr binning", subtitle = "1st Pol
 fig6.2.13 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                               data_noducks$mv_incparty, c = 0, ci = FALSE, 
                               binselect = "qsmv",
+                              subset = abs(data_noducks$mv_incparty)<50, 
                               p = 2)
-fig6.2.13 <- fig6.2.13$rdplot + labs(title = "qsmv binning", subtitle = "2nd Polynomial")
+fig6.2.13 <- fig6.2.13$rdplot + labs(title = "qsmv binning", subtitle = "2nd Polynomial",
+                                     x = "Incumbent party's margin of victory at t",
+                                     y = "Incumbent party's candidate t+1 young indicator (original report)") +
+  theme(panel.background = element_rect(fill = "white", color = "black"),
+        panel.grid = element_blank(),
+        title = element_text(size = 8),
+        axis.text = element_text(size = 6))
 
 fig6.2.14 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                               data_noducks$mv_incparty, c = 0, ci = FALSE, 
                               binselect = "qsmv",
+                              subset = abs(data_noducks$mv_incparty)<50, 
                               p = 1)
 
-fig6.2.14 <- fig6.2.14$rdplot + labs(title = "qsmv binning", subtitle = "1st Polynomial")
+fig6.2.14 <- fig6.2.14$rdplot + labs(title = "qsmv binning", subtitle = "1st Polynomial",
+                                     x = "Incumbent party's margin of victory at t",
+                                     y = "Incumbent party's candidate t+1 young indicator (original report)") +
+  theme(panel.background = element_rect(fill = "white", color = "black"),
+        panel.grid = element_blank(),
+        title = element_text(size = 8),
+        axis.text = element_text(size = 6))
 
 
 fig6.2.15 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                               data_noducks$mv_incparty, c = 0, ci = FALSE, 
-                              binselect = "qsmvpr", 
+                              binselect = "qsmvpr",
+                              subset = abs(data_noducks$mv_incparty)<50,  
                               p = 2)
-fig6.2.15 <- fig6.2.15$rdplot + labs(title = "qsmvpr binning", subtitle = "2nd Polynomial")
+fig6.2.15 <- fig6.2.15$rdplot + labs(title = "qsmvpr binning", subtitle = "2nd Polynomial",
+                                     x = "Incumbent party's margin of victory at t",
+                                     y = "Incumbent party's candidate t+1 young indicator (original report)") +
+  theme(panel.background = element_rect(fill = "white", color = "black"),
+        panel.grid = element_blank(),
+        title = element_text(size = 8),
+        axis.text = element_text(size = 6))
 
 fig6.2.16 <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
                               data_noducks$mv_incparty, c = 0, ci = FALSE, 
                               binselect = "qsmvpr", 
+                              subset = abs(data_noducks$mv_incparty)<50, 
                               p = 1)
 
-fig6.2.16 <- fig6.2.16$rdplot + labs(title = "qsmvpr binning", subtitle = "1st Polynomial")
+fig6.2.16 <- fig6.2.16$rdplot + labs(title = "qsmvpr binning", subtitle = "1st Polynomial",
+                                     x = "Incumbent party's margin of victory at t",
+                                     y = "Incumbent party's candidate t+1 young indicator (original report)") +
+  theme(panel.background = element_rect(fill = "white", color = "black"),
+        panel.grid = element_blank(),
+        title = element_text(size = 8),
+        axis.text = element_text(size = 6))
 
 
 fig6.2 <- gridExtra::grid.arrange(fig6.2.1, fig6.2.2, fig6.2.3, fig6.2.4, 
@@ -301,3 +341,35 @@ fig6.2 <- gridExtra::grid.arrange(fig6.2.1, fig6.2.2, fig6.2.3, fig6.2.4,
 ggsave(here::here("outputs", "figs", "original-paper-fig6_2.pdf"), fig6.2,
        width = 8,
        height = 30)
+
+#########
+#Fig 6 with Full Sample 
+#########
+
+
+
+# Is this (a) or (b)
+
+fig6.3l <- rdrobust::rdplot(data_noducks$youngF_inc_for1, 
+       data_noducks$mv_incparty, c = 0, ci = FALSE, 
+       binselect = "esmv", 
+       subset = abs(data_noducks$mv_incparty)<50, 
+       p = 2)
+
+fig6.3r <- rdrobust::rdplot(data$youngF_inc_for1, 
+       data$mv_incparty, c = 0, ci = FALSE, 
+       binselect = "esmv", 
+       subset = abs(data$mv_incparty)<50, 
+       p = 2)
+
+fig6.3l <- fig6.3l + theme()
+fig6.3r <- fig6.3r + theme()
+
+fig6.3 <- gridExtra::grid.arrange(fig6.3l, fig6.3r, nrow=1)
+
+
+ggsave(here::here("outputs", "figs", "original-paper-fig6_3.pdf"), fig6.3,
+       width = 14,
+       height = 8)
+
+rm(fig6.3, fig6.3l, fig6.3r)
