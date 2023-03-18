@@ -10,8 +10,11 @@ rm(list=ls())
 libs <- c("tidyverse", "haven")
 lapply(libs, require, character.only = TRUE)
 
-cnat.data <- read_dta("original_materials/main_paper/Data/cross-national-data.dta")
+file.rename(here::here("original_materials", "main_paper", "cross-national-data.tab"),
+here::here("original_materials", "main_paper", "cross-national-data.dta"))
 
+cnat.data <- haven::read_dta(
+    here::here("original_materials", "main_paper", "cross-national-data.dta"))
 
 ############
 # Figure 3
