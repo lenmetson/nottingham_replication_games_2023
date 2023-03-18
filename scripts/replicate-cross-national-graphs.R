@@ -122,7 +122,6 @@ rm(fig4tl, fig4tr,fig4bl, fig4br, fig4)
 # Figure 5
 ############
 
-#split data => HOW DID THEY SPLIT THE DATA???
 moderate <- cnat.data |>
   dplyr::filter(extremist2 <= 3)
 
