@@ -293,12 +293,42 @@ pred.probs <- cbind(pred.probs, pred.probs[,"High.Program"] - pred.probs[,"Low.P
 colnames(pred.probs)[9] <- "diff.personal"
 colnames(pred.probs)[10] <- "diff.personal"
 
+#check how SE of differences are calculated
 se.diff.personal <- sqrt(pred.probs[, 2]^2+pred.probs[, 4]^2)
 se.diff.program <- sqrt(pred.probs[, 6]^2+pred.probs[, 8]^2)
 pred.probs <- cbind(pred.probs, se.diff.personal)
 pred.probs <- cbind(pred.probs, se.diff.program)
 colnames(pred.probs)[11] <- "se.diff.personal"
 colnames(pred.probs)[12] <- "se.diff.program"
+
+
+######################
+# further predicted probabilities to check thresholds of extremism variable
+######################
+
+#Personalism
+
+range.ideo.personal <- ggpredict(lm.personal.ideo, terms = c("extremist2", "ev_total[quart2]"))
+ggplot(range.ideo.personal, aes(x, predicted)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = .1) +
+  facet_wrap(~group)+
+  ggtitle("Predicted Personalism Scores across Ideology Range at Volatility Quantiles") +
+  xlab("Ideology Extremism") +
+  ylab("Predicted Values") +
+  theme_minimal()
+
+#Programmaticism
+
+range.ideo.programatic <- ggpredict(lm.program.ideo, terms = c("extremist2", "ev_total[quart2]"))
+ggplot(range.ideo.programatic, aes(x, predicted)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = .1) +
+  facet_wrap(~group)+
+  ggtitle("Predicted Programmaticism Scores across Ideology Range at Volatility Quantiles") +
+  xlab("Ideology Extremism") +
+  ylab("Predicted Values") +
+  theme_minimal()
 
                   
 
