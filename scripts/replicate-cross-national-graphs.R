@@ -3,6 +3,7 @@
 # Replication Cross-National Analysis 
 # Stata to R
 # 18.03.23
+# Angela Odermatt, Lennard Metson, Edmund Kelly
 ##################################
 
 #file.rename(here::here("original_materials", "main_paper", 
@@ -191,13 +192,37 @@ rm(fig5tl, fig5tr,fig5bl, fig5br, fig5)
 
 
 
+
 ############
 # Parametric Analyses
 ############
-#SEs clustered by country
 
-cnat.data <- cnat.data %>%
-  mutate(extremist.bin = ifelse(extremist2 >= 3, 1, 0))
+#summary statistics
+sum.stats <- cnat.data %>%
+  mutate(presidential = ifelse(system == 0, 1, 0),
+         parliamentary = ifelse(system == 2, 1, 0),
+         assembly = ifelse(system == 1, 1, 0),
+         closed.list = ifelse(cl == 1, 1, 0),
+         open.list = ifelse(cl == 2, 1, 0),
+         non.list = ifelse(cl == 3, 1, 0)) %>%
+  select(-ccode, -system, -cl) %>%
+  summarise(across(everything(), 
+                   list(mean = ~mean(.x, na.rm = TRUE), sd = ~ sd(.x, na.rm = TRUE), 
+                        max = ~max(.x, na.rm = TRUE), min = ~min(.x, na.rm = TRUE),
+                        no.values = ~ sum(!is.na(.x))))) %>%
+  pivot_longer(cols = c(ends_with("mean"), ends_with("sd"), ends_with("max"), ends_with("min"), ends_with("no.values")), 
+               names_to = c('Variables', '.value'), 
+               names_pattern = c("(.*)_(.*)"))
+
+
+print(xtable(sum.stats,
+       digits = c(2, 2, 2, 2, 2, 2, 2),
+       align = c("l", "c", "c", "c", "c", "c", "c")), 
+      include.rownames=FALSE)
+
+
+
+#SEs clustered by country
 
 #Hypo 1
 lm.personal.base <- lm_robust(personal ~ ev_total + 
@@ -238,68 +263,316 @@ lm.program.ethn <- lm_robust(programmatic ~ ev_total*ethnic +
                              clusters = ccode)
 
 
+##########
+# Table D 1
+#######
+texreg(list(lm.personal.base, lm.program.base, 
+            lm.personal.ideo, lm.program.ideo, 
+            lm.personal.ethn, lm.program.ethn),
+       stars = c(0.01, 0.05, 0.1),
+       include.ci = F,
+       fontsize = "tiny",
+       custom.header = list("Baseline Model" = 1:2, "Extended Model" = 3:6),
+       custom.model.names = c("Personalism", "Programmaticness", 
+                              "Personalism", "Programmaticness", 
+                              "Personalism", "Programmaticness"),
+       caption = "Replication of Table D1 in the Appendix",
+       booktabs = T,
+       float.pos = "p")
+
 #Calculate Predicted Values
 
-#total
-predict.personal <- ggpredict(lm.personal.base, terms = "ev_total[quart2]")
-predict.program <- ggpredict(lm.program.base, terms = "ev_total[quart2]")
+##########
+# use marginaleffects package and see comments Spyros -> https://vincentarelbundock.github.io/marginaleffects/reference/comparisons.html
+#######
 
-#ethnicity
+#################
+#Personalism
+#################
 
-predict.personal.ethnic <- ggpredict(lm.personal.ethn, terms = c("ev_total[quart2]", "ethnic"))
-predict.program.ethnic <- ggpredict(lm.program.ethn, terms =  c("ev_total[quart2]", "ethnic"))
+##overall
+predict.personal.base <- avg_predictions(lm.personal.base, 
+                                         variables = list(ev_total = c(0.1510, 0.4197)))
+diff.personal.base <- avg_comparisons(lm.personal.base, 
+                                      variables = list(ev_total = c(0.1510, 0.4197)))
 
-#ideology
+##ethnicity
+#nonethnic parties
+ndat <- cnat.data
+ndat$ethnic <- 0
 
-predict.personal.ideo.low <- ggpredict(lm.personal.ideo, terms = c("ev_total[quart2]", "extremist2[0]"))
-predict.personal.ideo.high <- ggpredict(lm.personal.ideo, terms = c("ev_total[quart2]", "extremist2[3]"))
-predict.program.ideo.low <- ggpredict(lm.program.ideo, terms =  c("ev_total[quart2]", "extremist2[0]"))
-predict.program.ideo.high <- ggpredict(lm.program.ideo, terms =  c("ev_total[quart2]", "extremist2[3]"))
+predict.personal.nonethn <- avg_predictions(lm.personal.ethn, 
+                                         newdata = ndat, 
+                                         variables = list(ev_total = c(0.1510, 0.4197)))
+diff.personal.nonethn <- avg_comparisons(lm.personal.ethn, 
+                                      newdata = ndat,
+                                      variables = list(ev_total = c(0.1510, 0.4197)))
+#ethnic parties
+ndat <- cnat.data
+ndat$ethnic <- 1
+predict.personal.ethn <- avg_predictions(lm.personal.ethn, 
+                                         newdata = ndat, 
+                                         variables = list(ev_total = c(0.1510, 0.4197)))
+diff.personal.ethn <- avg_comparisons(lm.personal.ethn, 
+                                      newdata = ndat, 
+                                      variables = list(ev_total = c(0.1510, 0.4197)))
 
-#put into table
+##difference ethnic -- non-ethnic
+#low volatility
+ndat <- cnat.data
+ndat$ev_total <- 0.1510
+diff.personal.ethn.low <- avg_comparisons(lm.personal.ethn, 
+                                      newdata = ndat,  
+                                      variables = list(ethnic = c(0, 1)))
 
-pred.probs <- matrix(nrow = 5, ncol = 8, 
-                     dimnames = list(c("Overall", "Nonethnic", "Ethnic", "Moderate", "Extremist"),
-                                     c("Low.Personal", "SE", "High.Personal", "SE", "Low.Program", "SE", "High.Program", "SE")))
-#pred values
-pred.probs[1,c(1, 3)] <- predict.personal$predicted[c(1, 3)]
-pred.probs[1,c(5, 7)] <- predict.program$predicted[c(1, 3)]
-pred.probs[2,c(1, 3)] <- predict.personal.ethnic$predicted[c(1, 3)]
-pred.probs[2,c(5, 7)] <- predict.program.ethnic$predicted[c(1, 3)]
-pred.probs[3,c(1, 3)] <- predict.personal.ethnic$predicted[c(4, 6)]
-pred.probs[3,c(5, 7)] <- predict.program.ethnic$predicted[c(4, 6)]
-pred.probs[4,c(1, 3)] <- predict.personal.ideo.low$predicted[c(1, 3)]
-pred.probs[4,c(5, 7)] <- predict.program.ideo.low$predicted[c(1, 3)]
-pred.probs[5,c(1, 3)] <- predict.personal.ideo.high$predicted[c(1, 3)]
-pred.probs[5,c(5, 7)] <- predict.program.ideo.high$predicted[c(1, 3)]
+#high volatility
+ndat <- cnat.data
+ndat$ev_total <- 0.4197
+diff.personal.ethn.high <- avg_comparisons(lm.personal.ethn, 
+                                      newdata = ndat,  
+                                      variables = list(ethnic = c(0, 1)))
 
-#SEs
-pred.probs[1,c(2, 4)] <- predict.personal$std.error[c(1, 3)]
-pred.probs[1,c(6, 8)] <- predict.program$std.error[c(1, 3)]
-pred.probs[2,c(2, 4)] <- predict.personal.ethnic$std.error[c(1, 3)]
-pred.probs[2,c(6, 8)] <- predict.program.ethnic$std.error[c(1, 3)]
-pred.probs[3,c(2, 4)] <- predict.personal.ethnic$std.error[c(4, 6)]
-pred.probs[3,c(6, 8)] <- predict.program.ethnic$std.error[c(4, 6)]
-pred.probs[4,c(2, 4)] <- predict.personal.ideo.low$std.error[c(1, 3)]
-pred.probs[4,c(6, 8)] <- predict.program.ideo.low$std.error[c(1, 3)]
-pred.probs[5,c(2, 4)] <- predict.personal.ideo.high$std.error[c(1, 3)]
-pred.probs[5,c(6, 8)] <- predict.program.ideo.high$std.error[c(1, 3)]
+##Ideology
+#moderate parties
+ndat <- cnat.data
+ndat$extremist2 <- 0
+
+predict.personal.mod <- avg_predictions(lm.personal.ideo, 
+                                            newdata = ndat, 
+                                            variables = list(ev_total = c(0.1510, 0.4197)))
+diff.personal.mod <- avg_comparisons(lm.personal.ideo, 
+                                         newdata = ndat,
+                                         variables = list(ev_total = c(0.1510, 0.4197)))
+#extremist parties
+ndat <- cnat.data
+ndat$extremist2 <- 3
+predict.personal.ext <- avg_predictions(lm.personal.ideo, 
+                                         newdata = ndat, 
+                                         variables = list(ev_total = c(0.1510, 0.4197)))
+diff.personal.ext <- avg_comparisons(lm.personal.ideo, 
+                                      newdata = ndat, 
+                                      variables = list(ev_total = c(0.1510, 0.4197)))
+
+##difference moderate -- extremist
+#low volatility
+ndat <- cnat.data
+ndat$ev_total <- 0.1510
+diff.personal.ideo.low <- avg_comparisons(lm.personal.ideo, 
+                                          newdata = ndat,  
+                                          variables = list(extremist2 = c(0, 3)))
+
+#high volatility
+ndat <- cnat.data
+ndat$ev_total <- 0.4197
+diff.personal.ideo.high <- avg_comparisons(lm.personal.ideo, 
+                                           newdata = ndat,  
+                                           variables = list(extremist2 = c(0, 3)))
 
 
-#calculate differences
+#################
+#Programmaticness
+#################
 
-pred.probs <- cbind(pred.probs, pred.probs[,"High.Personal"] - pred.probs[,"Low.Personal"])
-pred.probs <- cbind(pred.probs, pred.probs[,"High.Program"] - pred.probs[,"Low.Program"])
-colnames(pred.probs)[9] <- "diff.personal"
-colnames(pred.probs)[10] <- "diff.personal"
+##overall
+predict.program.base <- avg_predictions(lm.program.base, 
+                                         variables = list(ev_total = c(0.1510, 0.4197)))
+diff.program.base <- avg_comparisons(lm.program.base, 
+                                      variables = list(ev_total = c(0.1510, 0.4197)))
 
-#check how SE of differences are calculated
-se.diff.personal <- sqrt(pred.probs[, 2]^2+pred.probs[, 4]^2)
-se.diff.program <- sqrt(pred.probs[, 6]^2+pred.probs[, 8]^2)
-pred.probs <- cbind(pred.probs, se.diff.personal)
-pred.probs <- cbind(pred.probs, se.diff.program)
-colnames(pred.probs)[11] <- "se.diff.personal"
-colnames(pred.probs)[12] <- "se.diff.program"
+##ethnicity
+#nonethnic parties
+ndat <- cnat.data
+ndat$ethnic <- 0
+
+predict.program.nonethn <- avg_predictions(lm.program.ethn, 
+                                            newdata = ndat, 
+                                            variables = list(ev_total = c(0.1510, 0.4197)))
+diff.program.nonethn <- avg_comparisons(lm.program.ethn, 
+                                         newdata = ndat,
+                                         variables = list(ev_total = c(0.1510, 0.4197)))
+#ethnic parties
+ndat <- cnat.data
+ndat$ethnic <- 1
+predict.program.ethn <- avg_predictions(lm.program.ethn, 
+                                         newdata = ndat, 
+                                         variables = list(ev_total = c(0.1510, 0.4197)))
+diff.program.ethn <- avg_comparisons(lm.program.ethn, 
+                                      newdata = ndat, 
+                                      variables = list(ev_total = c(0.1510, 0.4197)))
+
+##difference ethnic -- non-ethnic
+#low volatility
+ndat <- cnat.data
+ndat$ev_total <- 0.1510
+diff.program.ethn.low <- avg_comparisons(lm.program.ethn, 
+                                          newdata = ndat,  
+                                          variables = list(ethnic = c(0, 1)))
+
+#high volatility
+ndat <- cnat.data
+ndat$ev_total <- 0.4197
+diff.program.ethn.high <- avg_comparisons(lm.program.ethn, 
+                                           newdata = ndat,  
+                                           variables = list(ethnic = c(0, 1)))
+
+
+##Ideology
+#moderate parties
+ndat <- cnat.data
+ndat$extremist2 <- 0
+
+predict.program.mod <- avg_predictions(lm.program.ideo, 
+                                        newdata = ndat, 
+                                        variables = list(ev_total = c(0.1510, 0.4197)))
+diff.program.mod <- avg_comparisons(lm.program.ideo, 
+                                     newdata = ndat,
+                                     variables = list(ev_total = c(0.1510, 0.4197)))
+#extremist parties
+ndat <- cnat.data
+ndat$extremist2 <- 3
+predict.program.ext <- avg_predictions(lm.program.ideo, 
+                                        newdata = ndat, 
+                                        variables = list(ev_total = c(0.1510, 0.4197)))
+diff.program.ext <- avg_comparisons(lm.program.ideo, 
+                                     newdata = ndat, 
+                                     variables = list(ev_total = c(0.1510, 0.4197)))
+
+##difference moderate -- extremist
+#low volatility
+ndat <- cnat.data
+ndat$ev_total <- 0.1510
+diff.program.ideo.low <- avg_comparisons(lm.program.ideo, 
+                                          newdata = ndat,  
+                                          variables = list(extremist2 = c(0, 3)))
+
+#high volatility
+ndat <- cnat.data
+ndat$ev_total <- 0.4197
+diff.program.ideo.high <- avg_comparisons(lm.program.ideo, 
+                                           newdata = ndat,  
+                                           variables = list(extremist2 = c(0, 3)))
+
+
+##put into table
+
+pred.probs <- matrix(ncol = 4, nrow = 10,
+                     dimnames = list(c("Overall", "Overall.SE", "Nonethnic", "Nonethnic.SE",
+                                       "Ethnic", "Ethnic.SE", "Moderate", "Moderate.SE",
+                                       "Extremist", "Extremist.SE"),
+                                     c("Low.Volatility.Person", "High.Volatility.Person", 
+                                       "Low.Volatility.Program", "High.Volatility.Program")))
+
+#personal
+p.mods <- c("predict.personal.base", "predict.personal.nonethn", "predict.personal.ethn",
+            "predict.personal.mod", "predict.personal.ext")
+
+for (m in 1:length(p.mods)){
+  
+  df <- get(p.mods[m])
+  
+  if(m>1){i=(m*2)-1}
+  if(m==1){i=m}
+  
+  pred.probs[i, 1] <- df[1, 2]
+  pred.probs[i, 2] <- df[2, 2]
+  pred.probs[i + 1, 1] <- df[1, 3]
+  pred.probs[i + 1, 2] <- df[2, 3]
+  
+}
+
+#program
+p.mods <- c("predict.program.base", "predict.program.nonethn", "predict.program.ethn",
+            "predict.program.mod", "predict.program.ext")
+
+for (m in 1:length(p.mods)){
+  
+  df <- get(p.mods[m])
+  
+  if(m>1){i=(m*2)-1}
+  if(m==1){i=m}
+  
+  pred.probs[i, 3] <- df[1, 2]
+  pred.probs[i, 4] <- df[2, 2]
+  pred.probs[i + 1, 3] <- df[1, 3]
+  pred.probs[i + 1, 4] <- df[2, 3]
+  
+}
+
+
+#differences
+pred.probs <- cbind(pred.probs[, 1:2], Differences.Person = " ", pred.probs[, 3:ncol(pred.probs)])
+pred.probs <- cbind(pred.probs[, 1:5], Differences.Program = " ")
+
+#Personalism
+diff.mods <- c("diff.personal.base", "diff.personal.nonethn", "diff.personal.ethn",
+               "diff.personal.mod", "diff.personal.ext")
+
+for (m in 1:length(p.mods)){
+  
+  df <- get(diff.mods[m])
+  
+  if(m>1){i=(m*2)-1}
+  if(m==1){i=m}
+  
+  pred.probs[i, 3] <- df[1, 3]
+  pred.probs[i + 1, 3] <- df[1, 4]
+  
+}
+
+#Programmaticness
+diff.mods <- c("diff.program.base", "diff.program.nonethn", "diff.program.ethn",
+               "diff.program.mod", "diff.program.ext")
+
+for (m in 1:length(p.mods)){
+  
+  df <- get(diff.mods[m])
+  
+  if(m>1){i=(m*2)-1}
+  if(m==1){i=m}
+  
+  pred.probs[i, 6] <- df[1, 3]
+  pred.probs[i + 1, 6] <- df[1, 4]
+  
+}
+
+
+pred.probs <- rbind(pred.probs[1:6,], Differences.Ethnic = " ", Differences.Ethnic.SE = " ",pred.probs[7:10,])
+pred.probs <- rbind(pred.probs[1:12,], Differences.Ideo = " ", Differences.Ideo.SE = " ")
+
+diff.mods <- c("diff.personal.ethn.low", "diff.personal.ethn.high",
+               "diff.program.ethn.low", "diff.program.ethn.high")
+
+for (m in 1:length(diff.mods)){
+  
+  df <- get(diff.mods[m])
+  
+  if(m > 2){i=m+1}
+  if(m <= 2){i=m}
+  
+  pred.probs[7, i] <- df[1, 3]
+  pred.probs[8, i] <- df[1, 4]
+}
+
+diff.mods <- c("diff.personal.ideo.low", "diff.personal.ideo.low",
+               "diff.program.ideo.low","diff.program.ideo.high")
+
+for (m in 1:length(diff.mods)){
+  
+  df <- get(diff.mods[m])
+  
+  if(m > 2){i=m+1}
+  if(m <= 2){i=m}
+  
+  pred.probs[13, i] <- df[1, 3]
+  pred.probs[14, i] <- df[1, 4]
+}
+
+#print to tex
+pred.probs <- as.data.frame(pred.probs)
+pred.probs[] <- sapply(pred.probs, as.numeric)
+xtable(pred.probs, caption = "Replication of Table 1",
+       digits = c(2, 2, 2, 2, 2, 2, 2),
+       align = c("l", "c", "c", "c", "c", "c", "c"))
 
 
 ######################
@@ -309,27 +582,37 @@ colnames(pred.probs)[12] <- "se.diff.program"
 #Personalism
 
 range.ideo.personal <- ggpredict(lm.personal.ideo, terms = c("extremist2", "ev_total[quart2]"))
-ggplot(range.ideo.personal, aes(x, predicted)) +
+personal.ideo <- ggplot(range.ideo.personal, aes(x, predicted)) +
   geom_line() +
   geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = .1) +
   facet_wrap(~group)+
-  ggtitle("Predicted Personalism Scores across Ideology Range at Volatility Quantiles") +
   xlab("Ideology Extremism") +
   ylab("Predicted Values") +
-  theme_minimal()
+  theme(aspect.ratio = 1,
+        panel.background = element_rect(fill = "white", color = "black"),
+        panel.grid = element_blank())
+
+ggsave(here::here("outputs", "figs", "new-personal-ideo.pdf"), personal.ideo,
+       width = 14,
+       height = 8)
 
 #Programmaticism
 
 range.ideo.programatic <- ggpredict(lm.program.ideo, terms = c("extremist2", "ev_total[quart2]"))
-ggplot(range.ideo.programatic, aes(x, predicted)) +
+program.ideo <- ggplot(range.ideo.programatic, aes(x, predicted)) +
   geom_line() +
   geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = .1) +
   facet_wrap(~group)+
-  ggtitle("Predicted Programmaticism Scores across Ideology Range at Volatility Quantiles") +
   xlab("Ideology Extremism") +
   ylab("Predicted Values") +
-  theme_minimal()
+  theme(aspect.ratio = 1,
+        panel.background = element_rect(fill = "white", color = "black"),
+        panel.grid = element_blank())
+
+
+ggsave(here::here("outputs", "figs", "new-program-ideo.pdf"), program.ideo,
+       width = 14,
+       height = 8)
 
                   
-
-sessionInfo()
+session.info()
