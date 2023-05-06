@@ -193,6 +193,7 @@ rm(fig5tl, fig5tr,fig5bl, fig5br, fig5)
 
 
 
+
 ############
 # Parametric Analyses
 ############
@@ -222,7 +223,18 @@ print(xtable(sum.stats,
 
 
 
-#SEs clustered by country
+#linear models
+#factor variables
+cnat.data$cl <- factor(case_when(cnat.data$cl == 1 ~ "closed list",
+                                 cnat.data$cl == 2 ~ "open list",
+                                 TRUE ~ "non list")) %>%
+  relevel(ref = "non list")
+
+cnat.data$system <- factor(case_when(cnat.data$system == 0 ~ "presidential",
+                                cnat.data$system == 2 ~ "parliamentary",
+                                TRUE ~ "assembly")) %>%
+  relevel(ref = "assembly")
+
 
 #Hypo 1
 lm.personal.base <- lm_robust(personal ~ ev_total + 
@@ -280,11 +292,10 @@ texreg(list(lm.personal.base, lm.program.base,
        booktabs = T,
        float.pos = "p")
 
-#Calculate Predicted Values
 
 ##########
-# use marginaleffects package and see comments Spyros -> https://vincentarelbundock.github.io/marginaleffects/reference/comparisons.html
-#######
+#Calculate Predicted Values
+##########
 
 #################
 #Personalism
@@ -614,5 +625,5 @@ ggsave(here::here("outputs", "figs", "new-program-ideo.pdf"), program.ideo,
        width = 14,
        height = 8)
 
-                  
+
 session.info()
