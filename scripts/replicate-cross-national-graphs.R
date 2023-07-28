@@ -124,7 +124,7 @@ rm(fig4tl, fig4tr,fig4bl, fig4br, fig4)
 ############
 
 moderate <- cnat.data |>
-  dplyr::filter(extremist2 <= 3)
+  dplyr::filter(extremist2 < 3)
 
 extreme <- cnat.data |>
   dplyr::filter(extremist2 >= 3)
