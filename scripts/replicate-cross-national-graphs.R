@@ -191,7 +191,75 @@ ggsave(here::here("outputs", "figs", "original-paper-fig5.pdf"), fig5,
 rm(fig5tl, fig5tr,fig5bl, fig5br, fig5)
 
 
+############
+# Fig 6 - Test Raw Correlations for intraparty cohesion
+############
 
+cohesive <- cnat.data %>%
+  filter(ethnic == 1 | extremist2 >= 3)
+
+non.cohesive <- anti_join(cnat.data, cohesive)
+
+#Personalism Non-cohesive
+fig6tl <- ggplot(data = non.cohesive, aes(ev_total, personal)) + 
+  geom_hline(yintercept = 2.5, color = "grey", size=0.5) + 
+  geom_vline(xintercept = 0.4, color = "grey", size=0.5) +
+  geom_point(shape = 1) + 
+  geom_smooth(method = "lm", se = TRUE, size = 0.5, color = "red") +
+  xlim(0,0.8) + ylim(1,4) +
+  theme(aspect.ratio = 1,
+        panel.background = element_rect(fill = "white", color = "black"),
+        panel.grid = element_blank()) +
+  labs(title = "Personalism", subtitle = "Non-cohesive Parties",
+       x = "Volatily Index", y = "Personalism Score")
+
+#Personalism cohesive
+fig6tr <- ggplot(data = cohesive, aes(ev_total, personal)) + 
+  geom_hline(yintercept = 2.5, color = "grey", size=0.5) + 
+  geom_vline(xintercept = 0.4, color = "grey", size=0.5) +
+  geom_point(shape = 1) + 
+  geom_smooth(method = "lm", se = TRUE, size = 0.5, color = "red") +
+  xlim(0,0.8) + ylim(1,4) +
+  theme(aspect.ratio = 1,
+        panel.background = element_rect(fill = "white", color = "black"),
+        panel.grid = element_blank()) +
+  labs(title = "Personalism", subtitle = "Cohesive Parties",
+       x = "Volatily Index", y = "Personalism Score")
+
+#Programmaticism Non-cohesive
+fig6bl <- ggplot(data = non.cohesive, aes(ev_total, programmatic)) + 
+  geom_hline(yintercept = 2.5, color = "grey", size=0.5) + 
+  geom_vline(xintercept = 0.4, color = "grey", size=0.5) +
+  geom_point(shape = 1) + 
+  geom_smooth(method = "lm", se = TRUE, size = 0.5, color = "red") +
+  xlim(0,0.8) + ylim(1,4) +
+  theme(aspect.ratio = 1,
+        panel.background = element_rect(fill = "white", color = "black"),
+        panel.grid = element_blank()) +
+  labs(title = "Progrmmaticness", subtitle = "Non-cohesive Parties",
+       x = "Volatily Index", y = "Progrmmaticness Score")
+
+#Programmaticism cohesive
+fig6br <- ggplot(data = cohesive, aes(ev_total, programmatic)) + 
+  geom_hline(yintercept = 2.5, color = "grey", size=0.5) + 
+  geom_vline(xintercept = 0.4, color = "grey", size=0.5) +
+  geom_point(shape = 1) + 
+  geom_smooth(method = "lm", se = TRUE, size = 0.5, color = "red") +
+  xlim(0,0.8) + ylim(1,4) +
+  theme(aspect.ratio = 1,
+        panel.background = element_rect(fill = "white", color = "black"),
+        panel.grid = element_blank()) +
+  labs(title = "Progrmmaticness", subtitle = "Cohesive Parties",
+       x = "Volatily Index", y = "Progrmmaticness Score")
+
+
+fig6 <- gridExtra::grid.arrange(fig6tl, fig6tr, fig6bl, fig6br, nrow = 2)
+
+ggsave(here::here("outputs", "figs", "test-paper-fig6.pdf"), fig6,
+       width = 14,
+       height = 14)
+
+rm(fig6tl, fig6tr, fig6bl, fig6br, fig6)
 
 
 ############
